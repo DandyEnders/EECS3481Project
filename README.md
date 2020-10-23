@@ -19,5 +19,5 @@ python3 run.py --directory ./data --type aes --secrets secret --action encrypt
 
 Encrypt "./data/dummy.txt" using rc4Cipher with secret code "secret" .
 ```
-python3 run.py --directory ./data.dummy.txt --type rc4 --secrets secret --action encrypt 
+python3 run.py --directory ./data/dummy.txt --type rc4 --secrets secret --action encrypt 
 ```
