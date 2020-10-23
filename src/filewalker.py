@@ -9,9 +9,11 @@ def walk_files_and_apply_func (walk_directory, func):
         for file in files:
             full_dir = os.path.join(root, file)
             with open(full_dir, "rb") as f:
+                print(f"Reading file {full_dir}")
                 res = func(f.read())
 
             with open(full_dir, "wb") as f:
+                print(f"Writing file {full_dir}")
                 f.write(res)
 
 # walk_dir = sys.argv[1]
