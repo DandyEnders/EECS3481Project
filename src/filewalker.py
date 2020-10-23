@@ -2,11 +2,17 @@ import os
 import sys
 
 def walk_files_and_apply_func (walk_directory, func):
-    for root, _subdirs, files in os.walk(walk_directory):
+    new_folder_name = f"{walk_directory}_result"
+    os.system(f"rm -rf {new_folder_name}")
+    os.system(f"cp -rf {walk_directory} {new_folder_name}")
+    for root, _subdirs, files in os.walk(new_folder_name):
         for file in files:
-            full_dir = os.path.join(root, file);
+            full_dir = os.path.join(root, file)
             with open(full_dir, "rb") as f:
-                func(f)
+                res = func(f.read())
+
+            with open(full_dir, "wb") as f:
+                f.write(res)
 
 # walk_dir = sys.argv[1]
 
