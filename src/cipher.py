@@ -17,23 +17,26 @@ class XORCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
         # TODO
-        #self.key = bytes(key, 'ascii') #key string to bytes
-        self.key = key.encode('ascii')
+        #self.key = bytes(key, 'ascii') 
+        self.key = key.encode('ASCII')#key string to bytes
     def encrypt(self, plain_byte: bytes) -> bytes:
         print("encrypting")
-        result_int = (int.from_bytes(plain_byte, byteorder="big") ^ (int.from_bytes(self.key, byteorder="big")))
+        plain_int = int.from_bytes(plain_byte, byteorder="big")
+        key_int = int.from_bytes(self.key, byteorder="big")
+        result_int = plain_int ^ key_int
         result_string = str(result_int)
-        encrypted_byte = result_string.encode('ascii')
+        encrypted_byte = result_string.encode('ASCII')
         #encrypted_byte = plain_byte + (plain_byte ^ self.keys)
         #result_int = int.from_bytes(a, byteorder="big") ^ int.from_bytes(b, byteorder="big")
         return encrypted_byte
     
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         print("decrypting")
-        ciphertext = encrypted_byte
-        re_int = (int.from_bytes(ciphertext, byteorder="big") ^ (int.from_bytes(self.key, byteorder="big")))
+        encrypted_int = int.from_bytes(encrypted_byte, byteorder="big")
+        key_int = int.from_bytes(self.key, byteorder="big")
+        re_int = encrypted_int ^ key_int
         re_string = str(re_int)
-        plain_byte = re_string.encode('ascii') 
+        plain_byte = re_string.encode('ASCII') 
         #plain_byte = encrypted_byte+ (encrypted_byte ^ self.keys)
        # plain_byte = bytes(map(operator.xor, encrypted_byte, self.keys))
         return plain_byte
