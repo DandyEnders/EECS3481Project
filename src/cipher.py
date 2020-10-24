@@ -2,6 +2,8 @@ from Crypto.Cipher import Blowfish
 from Crypto import Random
 from struct import pack
 
+import hashlib
+
 
 class CipherMethod:
     def __init__(self, key):
@@ -63,7 +65,9 @@ class BlowFishCipher(CipherMethod):
         super().__init__(key)
         self.block_size = Blowfish.block_size
         self.iv = Random.new().read(self.block_size)
-        self.cipher = Blowfish.new(str.encode(key), 
+        byte_key = str.encode(key)
+        byte_key = hashlib.sha256(key.encode()).digest()
+        self.cipher = Blowfish.new(byte_key, 
                                    Blowfish.MODE_CBC, 
                                    self.iv)
     
