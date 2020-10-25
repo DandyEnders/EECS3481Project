@@ -1,0 +1,4 @@
+./data/*
+*.pyc
+./data_result/*
+./data_result_result/*

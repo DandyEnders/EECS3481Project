@@ -3,85 +3,87 @@ from Crypto import Random
 from struct import pack
 from arc4 import ARC4
 
+import hashlib
+from Crypto.Cipher import AES
+from base64 import b64encode, b64decode
+
+import Crypto
+from Crypto.Cipher import AES
+# hashes the key (password) into a 32 byte value
+from Crypto.Hash import SHA256
+from Crypto.Util.Padding import pad, unpad
+
 class CipherMethod:
     def __init__(self, key):
         self.key = key
-    
+
     def encrypt(self, plain_byte: bytes) -> bytes:
         pass
-    
+
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         pass
+
 
 class XORCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
         # TODO
-    
+
     def encrypt(self, plain_byte: bytes) -> bytes:
-        print("encrypting")
-        encrypted_byte = plain_byte # TODO, encrypt plain_byte
+        encrypted_byte = plain_byte  # TODO, encrypt plain_byte
         return encrypted_byte
-    
+
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        print("decrypting")
-        plain_byte = encrypted_byte # TODO, decrypt plain_byte
+        plain_byte = encrypted_byte  # TODO, decrypt plain_byte
         return plain_byte
-        
+
+
 class AESCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
-        # TODO
-    
+        self.block_size = AES.block_size
+        self.byte_key = hashlib.sha256(key.encode()).digest()
+        self.iv = (" " * self.block_size).encode()
+
     def encrypt(self, plain_byte: bytes) -> bytes:
-        print("encrypting", plain_byte)
-        encrypted_byte = plain_byte # TODO, encrypt plain_byte
+        encrypter = AES.new(self.byte_key, AES.MODE_CBC, iv=self.iv)
+        encrypted_byte = encrypter.encrypt(pad(plain_byte, self.block_size))
         return encrypted_byte
-    
+
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        print("decrypting")
-        plain_byte = encrypted_byte # TODO, decrypt plain_byte
+        decrypter = AES.new(self.byte_key, AES.MODE_CBC, iv=self.iv)
+        plain_byte = unpad(decrypter.decrypt(encrypted_byte), self.block_size)
         return plain_byte
-        
+
+
 class RC4Cipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
-        # TODO
-    
+
     def encrypt(self, plain_byte: bytes) -> bytes:
-        print("encrypting", plain_byte)
-        arc4 = ARC4(self.key.encode('utf-8'))
-        encrypted_byte = arc4.encrypt(plain_byte) # TODO, encrypt plain_byte
+        arc4 = ARC4(self.key.encode())
+        encrypted_byte = arc4.encrypt(plain_byte) 
         return encrypted_byte
-    
+
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        print("decrypting")
-        arc4 = ARC4(self.key.encode('utf-8'))
-        plain_byte = arc4.decrypt(encrypted_byte) # TODO, decrypt plain_byte
+        arc4 = ARC4(self.key.encode())
+        plain_byte = arc4.decrypt(encrypted_byte)
         return plain_byte
-        
+
+
 class BlowFishCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
         self.block_size = Blowfish.block_size
-        self.iv = Random.new().read(self.block_size)
-        self.cipher = Blowfish.new(str.encode(key), 
-                                   Blowfish.MODE_CBC, 
-                                   self.iv)
-    
+        self.byte_key = hashlib.sha256(key.encode()).digest()
+        self.iv = (" " * self.block_size).encode()
+        
     def encrypt(self, plain_byte: bytes) -> bytes:
-        print("encrypting")
-        plen = self.block_size - divmod(len(plain_byte), self.block_size)[1]
-        padding = [plen]*plen
-        padding = pack('b'*plen, *padding)
-        encrypted_byte = self.iv + self.cipher.encrypt(plain_byte + padding)
+        encrypter = Blowfish.new(self.byte_key, Blowfish.MODE_CBC, iv=self.iv)
+        encrypted_byte = encrypter.encrypt(pad(plain_byte, self.block_size))
         return encrypted_byte
-    
+
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        print("decrypting")
-        ciphertext = encrypted_byte
-        ciphertext = ciphertext[self.block_size:]
-        plain_byte = self.cipher.decrypt(ciphertext)
-        last_byte = plain_byte[-1]
-        plain_byte = plain_byte[:- (last_byte if type(last_byte) is int else ord(last_byte))]
+        decrypter = Blowfish.new(self.byte_key, Blowfish.MODE_CBC, iv=self.iv)
+        plain_byte = unpad(decrypter.decrypt(encrypted_byte), self.block_size)
         return plain_byte
