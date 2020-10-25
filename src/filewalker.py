@@ -10,11 +10,9 @@ def walk_files_and_apply_func (walk_directory, func):
         for file in files:
             full_dir = os.path.join(root, file)
             with open(full_dir, "rb") as f:
-                # print(f"Reading file {full_dir}")
                 res = func(f.read())
 
             with open(full_dir, "wb") as f:
-                # print(f"Writing file {full_dir}")
                 f.write(res)
 
 def walk_files_compare_file_hash (dir1, dir2):
@@ -38,34 +36,3 @@ def walk_files_compare_file_hash (dir1, dir2):
         print(pair[0][1] == pair[1][1], pair[0][0], pair[0][1], pair[1][1], sep="\t")
         
     return dir1_file_hashes == dir2_file_hashes
-            
-
-# walk_dir = sys.argv[1]
-
-# print('walk_dir = ' + walk_dir)
-
-# # If your current working directory may change during script execution, it's recommended to
-# # immediately convert program arguments to an absolute path. Then the variable root below will
-# # be an absolute path as well. Example:
-# # walk_dir = os.path.abspath(walk_dir)
-# print('walk_dir (absolute) = ' + os.path.abspath(walk_dir))
-
-# for root, subdirs, files in os.walk(walk_dir):
-#     print('--\nroot = ' + root)
-#     list_file_path = os.path.join(root, 'my-directory-list.txt')
-#     print('list_file_path = ' + list_file_path)
-
-#     with open(list_file_path, 'wb') as list_file:
-#         for subdir in subdirs:
-#             print('\t- subdirectory ' + subdir)
-
-#         for filename in files:
-#             file_path = os.path.join(root, filename)
-
-#             print('\t- file %s (full path: %s)' % (filename, file_path))
-
-#             with open(file_path, 'rb') as f:
-#                 f_content = f.read()
-#                 list_file.write(('The file %s contains:\n' % filename).encode('utf-8'))
-#                 list_file.write(f_content)
-#                 list_file.write(b'\n')

@@ -9,7 +9,6 @@ from base64 import b64encode, b64decode
 
 import Crypto
 from Crypto.Cipher import AES
-# hashes the key (password) into a 32 byte value
 from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad, unpad
 
