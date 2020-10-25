@@ -42,27 +42,27 @@ class XORCipher(CipherMethod):
 class AESCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
-        hash_obj = SHA256.new(key.encode('utf-8'))
-        self.cipher = hash_obj.digest()  # the key now made 32 bytes long
+        byte_key = hashlib.sha256(key.encode()).digest()
+        self.block_size = 16
+        self.iv = Random.new().read(self.block_size)
+        self.cipher = AES.new(byte_key, AES.MODE_CBC, self.iv)
 
     def encrypt(self, plain_byte: bytes) -> bytes:
         print("encrypting")
-        message = plain_byte
-        BLOCK_SIZE = 16
-        PAD = bytes('{', encoding="ascii")
-        def padding(v): return v + (BLOCK_SIZE - len(v) % BLOCK_SIZE) * PAD
-        cipher = AES.new(self.cipher, AES.MODE_ECB)
-        encrypted_byte = cipher.encrypt(padding(message))
+        plen = self.block_size - divmod(len(plain_byte), self.block_size)[1]
+        padding = [plen]*plen
+        padding = pack('b'*plen, *padding)
+        encrypted_byte = self.iv + self.cipher.encrypt(plain_byte + padding)
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         print("decrypting")
-        message = encrypted_byte
-        PAD = bytes('{', encoding="ascii")
-        decipher = AES.new(self.cipher, AES.MODE_ECB)
-        decrypt_pt = decipher.decrypt(message)
-        pad_index = decrypt_pt.find(PAD)
-        plain_byte = decrypt_pt[:pad_index]
+        ciphertext = encrypted_byte
+        ciphertext = ciphertext[self.block_size:]
+        plain_byte = self.cipher.decrypt(ciphertext)
+        last_byte = plain_byte[-1]
+        plain_byte = plain_byte[:- (last_byte if type(last_byte)
+                                    is int else ord(last_byte))]
         return plain_byte
 
 
