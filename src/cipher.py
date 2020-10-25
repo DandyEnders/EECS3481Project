@@ -29,12 +29,10 @@ class XORCipher(CipherMethod):
         # TODO
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        # print("encrypting")
         encrypted_byte = plain_byte  # TODO, encrypt plain_byte
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        # print("decrypting")
         plain_byte = encrypted_byte  # TODO, decrypt plain_byte
         return plain_byte
 
@@ -43,12 +41,11 @@ class AESCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
         byte_key = hashlib.sha256(key.encode()).digest()
-        self.block_size = 16
+        self.block_size = AES.block_size
         self.iv = Random.new().read(self.block_size)
         self.cipher = AES.new(byte_key, AES.MODE_CBC, self.iv)
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        print("encrypting")
         plen = self.block_size - divmod(len(plain_byte), self.block_size)[1]
         padding = [plen]*plen
         padding = pack('b'*plen, *padding)
@@ -56,7 +53,6 @@ class AESCipher(CipherMethod):
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        print("decrypting")
         ciphertext = encrypted_byte
         ciphertext = ciphertext[self.block_size:]
         plain_byte = self.cipher.decrypt(ciphertext)
@@ -72,12 +68,10 @@ class RC4Cipher(CipherMethod):
         # TODO
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        # print("encrypting")
         encrypted_byte = plain_byte  # TODO, encrypt plain_byte
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        # print("decrypting")
         plain_byte = encrypted_byte  # TODO, decrypt plain_byte
         return plain_byte
 
@@ -94,7 +88,6 @@ class BlowFishCipher(CipherMethod):
                                    self.iv)
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        # print("encrypting")
         plen = self.block_size - divmod(len(plain_byte), self.block_size)[1]
         padding = [plen]*plen
         padding = pack('b'*plen, *padding)
@@ -102,7 +95,6 @@ class BlowFishCipher(CipherMethod):
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        # print("decrypting")
         ciphertext = encrypted_byte
         ciphertext = ciphertext[self.block_size:]
         plain_byte = self.cipher.decrypt(ciphertext)
