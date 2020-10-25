@@ -50,13 +50,13 @@ class RC4Cipher(CipherMethod):
     
     def encrypt(self, plain_byte: bytes) -> bytes:
         print("encrypting", plain_byte)
-        arc4 = ARC4(self.key)
+        arc4 = ARC4(self.key.encode('utf-8'))
         encrypted_byte = arc4.encrypt(plain_byte) # TODO, encrypt plain_byte
         return encrypted_byte
     
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         print("decrypting")
-        arc4 = ARC4(self.key)
+        arc4 = ARC4(self.key.encode('utf-8'))
         plain_byte = arc4.decrypt(encrypted_byte) # TODO, decrypt plain_byte
         return plain_byte
         
