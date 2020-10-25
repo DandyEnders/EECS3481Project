@@ -1,7 +1,7 @@
 from Crypto.Cipher import Blowfish
 from Crypto import Random
 from struct import pack
-
+from arc4 import ARC4
 
 class CipherMethod:
     def __init__(self, key):
@@ -50,12 +50,14 @@ class RC4Cipher(CipherMethod):
     
     def encrypt(self, plain_byte: bytes) -> bytes:
         print("encrypting", plain_byte)
-        encrypted_byte = plain_byte # TODO, encrypt plain_byte
+        arc4 = ARC4(self.key)
+        encrypted_byte = arc4.encrypt(plain_byte) # TODO, encrypt plain_byte
         return encrypted_byte
     
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         print("decrypting")
-        plain_byte = encrypted_byte # TODO, decrypt plain_byte
+        arc4 = ARC4(self.key)
+        plain_byte = arc4.decrypt(encrypted_byte) # TODO, decrypt plain_byte
         return plain_byte
         
 class BlowFishCipher(CipherMethod):
