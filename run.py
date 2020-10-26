@@ -6,13 +6,12 @@ from src import cipher
 # The ransomware agent should be able to encrypt and decrypt file contents using the command line. 
 # The command line should receive the following argument options:
 
-# --folder : The folder that will be used for encryption
+# --directory : The directory that will be used for encryption
 # --type: gets to values of “sym” and “asym” for symmetric and asymmetric algorithm selection
 # --secrets: an n-tuple input used for secrets such as keys, and other important parameters needed for the crypto scheme, e.g. algorithm itself. Feel free to define sub-parameters if needed.
 # --action: decrypt or encrypt
 
 def main(directory: str, cipher_type: str, secrets: str, action: str):
-    # print(f"{directory}, {cipher_type}, {secrets}, {action}")
     cipher_methods = {
         "xor": cipher.XORCipher(secrets),
         "aes": cipher.AESCipher(secrets),

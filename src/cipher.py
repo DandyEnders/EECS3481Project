@@ -2,6 +2,7 @@ from Crypto.Cipher import Blowfish
 from Crypto import Random
 from struct import pack
 from arc4 import ARC4
+from itertools import cycle
 
 import hashlib
 from Crypto.Cipher import AES
@@ -26,16 +27,13 @@ class CipherMethod:
 class XORCipher(CipherMethod):
     def __init__(self, key):
         super().__init__(key)
-        # TODO
+        self.key = key.encode('utf-8')
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        encrypted_byte = plain_byte  # TODO, encrypt plain_byte
-        return encrypted_byte
+        return bytes([_a ^ _b for _a, _b in zip(plain_byte, cycle(self.key))])
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        plain_byte = encrypted_byte  # TODO, decrypt plain_byte
-        return plain_byte
-
+        return bytes([_a ^ _b for _a, _b in zip(encrypted_byte, cycle(self.key))])
 
 class AESCipher(CipherMethod):
     def __init__(self, key):
