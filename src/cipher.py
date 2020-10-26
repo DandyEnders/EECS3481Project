@@ -28,23 +28,11 @@ class XORCipher(CipherMethod):
 
     def encrypt(self, plain_byte: bytes) -> bytes:
         print("encrypting")
-        # plain_int = int.from_bytes(plain_byte, byteorder="big")
-        # key_int = int.from_bytes(self.key, byteorder="big")
-        # result_int = plain_int ^ key_int
-        # result_string = str(result_int)
-        # encrypted_byte = result_string.encode('utf-8')
-        # return encrypted_byte
-        return bytes([_a ^ _b for _a, _b in zip(plain_byte, self.key)])
+        return bytes([_a ^ _b for _a, _b in zip(plain_byte, cycle(self.key))])
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         print("decrypting")
-        # encrypted_int = int.from_bytes(encrypted_byte, byteorder="big")
-        # key_int = int.from_bytes(self.key, byteorder="big")
-        # result_int = encrypted_int ^ key_int
-        # result_string = str(result_int)
-        # plain_byte = result_string.encode('utf-8')
-        # return plain_byte
-        return bytes([_a ^ _b for _a, _b in zip(encrypted_byte, self.key)])
+        return bytes([_a ^ _b for _a, _b in zip(encrypted_byte, cycle(self.key))])
 
 
 class AESCipher(CipherMethod):
