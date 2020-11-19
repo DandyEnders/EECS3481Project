@@ -84,3 +84,27 @@ class BlowFishCipher(CipherMethod):
         decrypter = Blowfish.new(self.byte_key, Blowfish.MODE_CBC, iv=self.iv)
         plain_byte = unpad(decrypter.decrypt(encrypted_byte), self.block_size)
         return plain_byte
+
+class RSACipher(CipherMethod):
+    def __init__(self, key):
+        pass
+
+    def encrypt(self, plain_byte: bytes) -> bytes:
+        encrypted_byte = plain_byte # TODO
+        return encrypted_byte
+
+    def decrypt(self, encrypted_byte: bytes) -> bytes:
+        plain_byte = encrypted_byte # TODO
+        return plain_byte
+    
+class ECCCipher(CipherMethod):
+    def __init__(self, key):
+        pass
+
+    def encrypt(self, plain_byte: bytes) -> bytes:
+        encrypted_byte = plain_byte # TODO
+        return encrypted_byte
+
+    def decrypt(self, encrypted_byte: bytes) -> bytes:
+        plain_byte = encrypted_byte # TODO
+        return plain_byte

@@ -3,7 +3,7 @@ import sys
 import subprocess
 
 def walk_files_and_apply_func (walk_directory, func):
-    new_folder_name = f"{walk_directory}_result"
+    new_folder_name = f"{walk_directory}_result" # TODO: Add directory flexibility
     os.system(f"rm -rf {new_folder_name}")
     os.system(f"cp -rf {walk_directory} {new_folder_name}")
     for root, _subdirs, files in os.walk(new_folder_name):

@@ -16,7 +16,9 @@ def main(directory: str, cipher_type: str, secrets: str, action: str):
         "xor": cipher.XORCipher(secrets),
         "aes": cipher.AESCipher(secrets),
         "rc4": cipher.RC4Cipher(secrets),
-        "blowfish": cipher.BlowFishCipher(secrets)
+        "blowfish": cipher.BlowFishCipher(secrets),
+        "rsa": cipher.RSACipher(secrets),
+        "ecc": cipher.ECCCipher(secrets)
     }
     
     chosen_cipher_method = cipher_methods.get(cipher_type.lower())
