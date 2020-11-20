@@ -1,17 +1,33 @@
+import binascii
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+import Crypto
 from Crypto.Cipher import Blowfish
 from Crypto import Random
 from struct import pack
-from arc4 import ARC4
+from Crypto.Cipher import ARC4
 from itertools import cycle
 
 import hashlib
 from Crypto.Cipher import AES
 from base64 import b64encode, b64decode
 
-import Crypto
+
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad, unpad
+
+
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA512, SHA384, SHA256, SHA, MD5
+from Crypto import Random
+from base64 import b64encode, b64decode
+hash = "SHA-256"
+
 
 class CipherMethod:
     def __init__(self, key):
@@ -34,6 +50,7 @@ class XORCipher(CipherMethod):
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
         return bytes([_a ^ _b for _a, _b in zip(encrypted_byte, cycle(self.key))])
+
 
 class AESCipher(CipherMethod):
     def __init__(self, key):
@@ -59,7 +76,7 @@ class RC4Cipher(CipherMethod):
 
     def encrypt(self, plain_byte: bytes) -> bytes:
         arc4 = ARC4(self.key.encode())
-        encrypted_byte = arc4.encrypt(plain_byte) 
+        encrypted_byte = arc4.encrypt(plain_byte)
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
@@ -74,7 +91,7 @@ class BlowFishCipher(CipherMethod):
         self.block_size = Blowfish.block_size
         self.byte_key = hashlib.sha256(key.encode()).digest()
         self.iv = (" " * self.block_size).encode()
-        
+
     def encrypt(self, plain_byte: bytes) -> bytes:
         encrypter = Blowfish.new(self.byte_key, Blowfish.MODE_CBC, iv=self.iv)
         encrypted_byte = encrypter.encrypt(pad(plain_byte, self.block_size))
@@ -85,26 +102,63 @@ class BlowFishCipher(CipherMethod):
         plain_byte = unpad(decrypter.decrypt(encrypted_byte), self.block_size)
         return plain_byte
 
+
+# keyPair = RSA.generate(3072)
+
+# pubKey = keyPair.publickey()
+# print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
+# pubKeyPEM = pubKey.exportKey()
+# print(pubKeyPEM.decode('ascii'))
+
+# print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
+# privKeyPEM = keyPair.exportKey()
+# print(privKeyPEM.decode('ascii'))
+
+# msg = b'www.google.com'
+# encryptor = PKCS1_OAEP.new(pubKey)
+# encrypted = encryptor.encrypt(msg)
+# print("Encrypted:", binascii.hexlify(encrypted))
+
+
+# decryptor = PKCS1_OAEP.new(keyPair)
+# decrypted = decryptor.decrypt(encrypted)
+# print('Decrypted:', decrypted)
+
+
 class RSACipher(CipherMethod):
     def __init__(self, key):
-        pass
+        super().__init__(key)
+        self.keyPair = RSA.generate(3072)
+        self.pubKey = self.keyPair.publickey()
+        # print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
+        self.pubKeyPEM = self.pubKey.exportKey()
+        # print(pubKeyPEM.decode('ascii'))
+        # print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
+        self.privKeyPEM = self.keyPair.exportKey()
+        # print(privKeyPEM.decode('ascii'))
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        encrypted_byte = plain_byte # TODO
-        return encrypted_byte
+        encryptor = PKCS1_OAEP.new(self.pubKey)
+        print("plainbyte to be encrypted: ", plain_byte)
+        encrypted = encryptor.encrypt(plain_byte)
+        # print("encrypted: ", binascii.hexlify(encrypted))
+        return encrypted
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        plain_byte = encrypted_byte # TODO
-        return plain_byte
-    
+        decryptor = PKCS1_OAEP.new(self.keyPair)
+        decrypted = decryptor.decrypt(encrypted_byte)
+        print("Decrypted: ", decrypted)
+        return decrypted
+
+
 class ECCCipher(CipherMethod):
     def __init__(self, key):
         pass
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        encrypted_byte = plain_byte # TODO
+        encrypted_byte = plain_byte  # TODO
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        plain_byte = encrypted_byte # TODO
+        plain_byte = encrypted_byte  # TODO
         return plain_byte
