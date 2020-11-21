@@ -1,4 +1,5 @@
 import binascii
+import rsa
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
@@ -101,28 +102,6 @@ class BlowFishCipher(CipherMethod):
         decrypter = Blowfish.new(self.byte_key, Blowfish.MODE_CBC, iv=self.iv)
         plain_byte = unpad(decrypter.decrypt(encrypted_byte), self.block_size)
         return plain_byte
-
-
-# keyPair = RSA.generate(3072)
-
-# pubKey = keyPair.publickey()
-# print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
-# pubKeyPEM = pubKey.exportKey()
-# print(pubKeyPEM.decode('ascii'))
-
-# print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
-# privKeyPEM = keyPair.exportKey()
-# print(privKeyPEM.decode('ascii'))
-
-# msg = b'www.google.com'
-# encryptor = PKCS1_OAEP.new(pubKey)
-# encrypted = encryptor.encrypt(msg)
-# print("Encrypted:", binascii.hexlify(encrypted))
-
-
-# decryptor = PKCS1_OAEP.new(keyPair)
-# decrypted = decryptor.decrypt(encrypted)
-# print('Decrypted:', decrypted)
 
 
 class RSACipher(CipherMethod):
