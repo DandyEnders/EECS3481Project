@@ -1,32 +1,15 @@
-import binascii
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
-import Crypto
+from cryptography.fernet import Fernet
+import rsa
 from Crypto.Cipher import Blowfish
-from Crypto import Random
-from struct import pack
 from Crypto.Cipher import ARC4
 from itertools import cycle
 
 import hashlib
 from Crypto.Cipher import AES
-from base64 import b64encode, b64decode
-
 
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad, unpad
-
-
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_OAEP
-from Crypto.Signature import PKCS1_v1_5
-from Crypto.Hash import SHA512, SHA384, SHA256, SHA, MD5
-from Crypto import Random
-from base64 import b64encode, b64decode
-hash = "SHA-256"
 
 
 class CipherMethod:
@@ -103,52 +86,45 @@ class BlowFishCipher(CipherMethod):
         return plain_byte
 
 
-# keyPair = RSA.generate(3072)
-
-# pubKey = keyPair.publickey()
-# print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
-# pubKeyPEM = pubKey.exportKey()
-# print(pubKeyPEM.decode('ascii'))
-
-# print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
-# privKeyPEM = keyPair.exportKey()
-# print(privKeyPEM.decode('ascii'))
-
-# msg = b'www.google.com'
-# encryptor = PKCS1_OAEP.new(pubKey)
-# encrypted = encryptor.encrypt(msg)
-# print("Encrypted:", binascii.hexlify(encrypted))
-
-
-# decryptor = PKCS1_OAEP.new(keyPair)
-# decrypted = decryptor.decrypt(encrypted)
-# print('Decrypted:', decrypted)
-
-
 class RSACipher(CipherMethod):
+    # encrypt with one key, decrypt with another
+    # rsa slow so use symmetrci for encryption and then rsa to encrypt the key
+    # can only encrypt something thats only the size of the key or less
+    # each time run functions generates new pub and priv key therefore decryption is hard
+    # therefore use rsa to encrypt the key that is used for encryption and decryption
+    # encrypt file with symmetric encryption and encrypt keys with asymetric encryption
+
     def __init__(self, key):
         super().__init__(key)
-        self.keyPair = RSA.generate(3072)
-        self.pubKey = self.keyPair.publickey()
-        # print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
-        self.pubKeyPEM = self.pubKey.exportKey()
-        # print(pubKeyPEM.decode('ascii'))
-        # print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
-        self.privKeyPEM = self.keyPair.exportKey()
-        # print(privKeyPEM.decode('ascii'))
+        sym_key_file = open('./src/rsaKeys/symmetric.key', 'rb')
+        self.symKey = sym_key_file.read()
+        # create the cipher
+        self.cipher = Fernet(self.symKey)
+        pub_key_file = open('./src/rsaKeys/publicKey.key', 'rb')
+        pub_key_file_read = pub_key_file.read()
+        # special format for loading in pub key for rsa
+        self.pubKey = rsa.PublicKey.load_pkcs1(pub_key_file_read)
+        # encrypt the sym key file with pub key
+        self.encrypted_key = rsa.encrypt(self.symKey, self.pubKey)
+        # write the encrypted symm key to a file
+        ekey = open('./src/rsaKeys/encrypted_key', 'wb')
+        ekey.write(self.encrypted_key)
+        # load private key to decrypt the public key
+        prkey = open('./src/rsaKeys/privkey.key', 'rb')
+        pkey = prkey.read()
+        self.private_key = rsa.PrivateKey.load_pkcs1(pkey)
+        self.decrypted_public_key = rsa.decrypt(
+            self.encrypted_key, self.private_key)
+        self.cipher2 = Fernet(self.decrypted_public_key)
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        encryptor = PKCS1_OAEP.new(self.pubKey)
-        print("plainbyte to be encrypted: ", plain_byte)
-        encrypted = encryptor.encrypt(plain_byte)
-        # print("encrypted: ", binascii.hexlify(encrypted))
+        encrypted = self.cipher.encrypt(plain_byte)
         return encrypted
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        decryptor = PKCS1_OAEP.new(self.keyPair)
-        decrypted = decryptor.decrypt(encrypted_byte)
-        print("Decrypted: ", decrypted)
-        return decrypted
+        # decrypt encrypted public key with private key to decrypt the file
+        decrypted_data = self.cipher2.decrypt(encrypted_byte)
+        return decrypted_data
 
 
 class ECCCipher(CipherMethod):
