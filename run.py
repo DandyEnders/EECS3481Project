@@ -11,14 +11,14 @@ from src import cipher
 # --secrets: an n-tuple input used for secrets such as keys, and other important parameters needed for the crypto scheme, e.g. algorithm itself. Feel free to define sub-parameters if needed.
 # --action: decrypt or encrypt
 
-def main(directory: str, cipher_type: str, secrets: str, action: str):
+def main(directory: str, cipher_type: str, secrets: str, privateKey: str, publicKey: str, action: str):
     cipher_methods = {
         "xor": cipher.XORCipher(secrets),
         "aes": cipher.AESCipher(secrets),
         "rc4": cipher.RC4Cipher(secrets),
         "blowfish": cipher.BlowFishCipher(secrets),
-        "rsa": cipher.RSACipher(secrets),
-        "ecc": cipher.ECCCipher(secrets)
+        "rsa": cipher.RSACipher(privateKey, publicKey),
+        "ecc": cipher.ECCCipher(privateKey, publicKey)
     }
     
     chosen_cipher_method = cipher_methods.get(cipher_type.lower())
@@ -31,5 +31,5 @@ def main(directory: str, cipher_type: str, secrets: str, action: str):
 
 if __name__ == "__main__":
     argv = argparser.run_argparser().parse_args()
-    main(argv.directory, argv.type, argv.secrets, argv.action)
+    main(argv.directory, argv.type, argv.secrets, argv.privateKey, argv.publicKey, argv.action)
     

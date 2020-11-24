@@ -14,8 +14,8 @@ from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad, unpad
 
 class CipherMethod:
-    def __init__(self, key):
-        self.key = key
+    def __init__(self):
+        pass
 
     def encrypt(self, plain_byte: bytes) -> bytes:
         pass
@@ -26,7 +26,7 @@ class CipherMethod:
 
 class XORCipher(CipherMethod):
     def __init__(self, key):
-        super().__init__(key)
+        self.key = key
         self.key = key.encode('utf-8')
 
     def encrypt(self, plain_byte: bytes) -> bytes:
@@ -37,7 +37,7 @@ class XORCipher(CipherMethod):
 
 class AESCipher(CipherMethod):
     def __init__(self, key):
-        super().__init__(key)
+        self.key = key
         self.block_size = AES.block_size
         self.byte_key = hashlib.sha256(key.encode()).digest()
         self.iv = (" " * self.block_size).encode()
@@ -55,7 +55,7 @@ class AESCipher(CipherMethod):
 
 class RC4Cipher(CipherMethod):
     def __init__(self, key):
-        super().__init__(key)
+        self.key = key
 
     def encrypt(self, plain_byte: bytes) -> bytes:
         arc4 = ARC4(self.key.encode())
@@ -70,7 +70,7 @@ class RC4Cipher(CipherMethod):
 
 class BlowFishCipher(CipherMethod):
     def __init__(self, key):
-        super().__init__(key)
+        self.key = key
         self.block_size = Blowfish.block_size
         self.byte_key = hashlib.sha256(key.encode()).digest()
         self.iv = (" " * self.block_size).encode()
@@ -86,25 +86,29 @@ class BlowFishCipher(CipherMethod):
         return plain_byte
 
 class RSACipher(CipherMethod):
-    def __init__(self, key):
-        pass
+    def __init__(self, private_key, public_key):
+        self.private_key = private_key
+        self.public_key = public_key
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        encrypted_byte = plain_byte # TODO
+        encrypted_byte = plain_byte
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        plain_byte = encrypted_byte # TODO
+        plain_byte = encrypted_byte
         return plain_byte
-    
+
+
 class ECCCipher(CipherMethod):
-    def __init__(self, key):
-        pass
+    def __init__(self, private_key, public_key):
+        self.private_key = private_key
+        self.public_key = public_key
 
     def encrypt(self, plain_byte: bytes) -> bytes:
-        encrypted_byte = plain_byte # TODO
+        encrypted_byte = plain_byte
         return encrypted_byte
 
     def decrypt(self, encrypted_byte: bytes) -> bytes:
-        plain_byte = encrypted_byte # TODO
+        plain_byte = encrypted_byte
         return plain_byte
+
