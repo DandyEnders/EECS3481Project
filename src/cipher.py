@@ -18,6 +18,8 @@ from Crypto.PublicKey import ECC
 from abc import ABC, abstractmethod
 
 import rsa
+# from ecies import encrypt, decrypt
+import ecies
 
 class CipherMethod(ABC):
     @abstractmethod
@@ -95,48 +97,40 @@ class BlowFishCipher(CipherMethod):
         return plain_byte
     
 class ECCCipher(CipherMethod):
-    def __init__(self, sender_private_key, sender_public_key, receiver_public_key):
+    def __init__(self, sender_private_key, receiver_public_key):
         self.aes_key = b'D\xfb+Q\x16\xae\xc0\xaa\x11&\xed\xc0`\xd2\xcb\x14'
-        # Discard all comments below if you need to. These were left to experiment.
-        # self.sender_private_key = ECC.import_key(sender_private_key)
-        # self.sender_public_key = ECC.import_key(sender_private_key)
-        # self.reciever_public_key = ECC.import_key(reciever_public_key)
+        self.sender_private_key = sender_private_key
+        self.receiver_public_key = receiver_public_key
         
-        # self.asym_encrypt_cipher = PKCS1_OAEP.new(self.reciever_public_key)
-        # self.encrypted_session_key = self.asym_encrypt_cipher.encrypt(self.session_key)
-        
-
     def encrypt(self, plain_byte: bytes) -> bytes:
-        # symmetric_encrypt_cipher = AES.new(self.session_key, AES.MODE_ECB)
-        
-        encrypted_byte = plain_byte
-        return encrypted_byte
-
-    def decrypt(self, encrypted_byte: bytes) -> bytes:
-        # asym_decrypt_cipher = PKCS1_OAEP.new(self.sender_private_key)
-        # decrypted_session_key = asym_decrypt_cipher.decrypt(self.encrypted_session_key)
-        
-        # symmetric_decrypt_cipher = AES.new(decrypted_session_key, AES.MODE_ECB)
-        
-        plain_byte = encrypted_byte
-        return plain_byte
-
-class RSACipher(CipherMethod):
-    def __init__(self, sender_private_key, sender_public_key, receiver_public_key):
-        self.aes_key = b'D\xfb+Q\x16\xae\xc0\xaa\x11&\xed\xc0`\xd2\xcb\x14'
-
-        self.sender_private_key = rsa.PrivateKey.load_pkcs1(sender_private_key.encode())
-        self.sender_public_key = rsa.PublicKey.load_pkcs1(sender_public_key.encode())
-        self.receiver_public_key = rsa.PublicKey.load_pkcs1(receiver_public_key.encode())
-
-    def encrypt(self, plain_byte: bytes) -> bytes:
+        encrypted_aes_key = ecies.encrypt(self.receiver_public_key, self.aes_key)
         symmetric_encrypt_cipher = NoEncodeAESCipher(self.aes_key)
         
         encrypted_byte = symmetric_encrypt_cipher.encrypt(plain_byte)
-        return encrypted_byte
+        return encrypted_byte, encrypted_aes_key
 
-    def decrypt(self, encrypted_byte: bytes) -> bytes:
-        encrypted_aes_key = rsa.encrypt(self.aes_key, self.sender_public_key)
+    def decrypt(self, encrypted_byte: bytes, encrypted_aes_key: bytes) -> bytes:
+        decrypted_aes_key = ecies.decrypt(self.sender_private_key, encrypted_aes_key)
+        
+        symmetric_decrypt_cipher = NoEncodeAESCipher(decrypted_aes_key)
+        
+        plain_byte = symmetric_decrypt_cipher.decrypt(encrypted_byte)
+        return plain_byte
+
+class RSACipher:
+    def __init__(self, sender_private_key, receiver_public_key):
+        self.aes_key = b'D\xfb+Q\x16\xae\xc0\xaa\x11&\xed\xc0`\xd2\xcb\x14'
+        self.sender_private_key = rsa.PrivateKey.load_pkcs1(sender_private_key.encode())
+        self.receiver_public_key = rsa.PublicKey.load_pkcs1(receiver_public_key.encode())
+
+    def encrypt(self, plain_byte: bytes) -> bytes:
+        encrypted_aes_key = rsa.encrypt(self.aes_key, self.receiver_public_key)
+        symmetric_encrypt_cipher = NoEncodeAESCipher(self.aes_key)
+        
+        encrypted_byte = symmetric_encrypt_cipher.encrypt(plain_byte)
+        return encrypted_byte, encrypted_aes_key
+
+    def decrypt(self, encrypted_byte: bytes, encrypted_aes_key: bytes) -> bytes:
         decrypted_aes_key = rsa.decrypt(encrypted_aes_key, self.sender_private_key)
         
         symmetric_decrypt_cipher = NoEncodeAESCipher(decrypted_aes_key)

@@ -13,30 +13,35 @@ from keys.get_keys import get_keys
 # --action: decrypt or encrypt
 
 def main(directory: str, cipher_type: str, secrets: str, sender: str, receiver: str, action: str):
-    cipher_methods = {
+    symmetric_cipher_methods = {
         "xor": cipher.XORCipher(secrets),
         "aes": cipher.AESCipher(secrets),
         "rc4": cipher.RC4Cipher(secrets),
         "blowfish": cipher.BlowFishCipher(secrets)
     }
-    if cipher_type in cipher_methods.keys():
-        chosen_cipher_method = cipher_methods.get(cipher_type.lower())
+    if cipher_type in symmetric_cipher_methods.keys():
+        chosen_cipher_method = symmetric_cipher_methods.get(cipher_type.lower())
+        
+        if action == "encrypt":
+            filewalker.walk_files_and_apply_func(directory, chosen_cipher_method.encrypt)
+        elif action == "decrypt":
+            filewalker.walk_files_and_apply_func(directory, chosen_cipher_method.decrypt)
     else:
         if cipher_type.lower() == "rsa":
             sender_private_key = get_keys(sender, "rsa", "private")
-            sender_public_key = get_keys(sender, "rsa", "public")
             receiver_public_key = get_keys(receiver, "rsa", "public")
-            chosen_cipher_method = cipher.RSACipher(sender_private_key, sender_public_key, receiver_public_key)
+            chosen_cipher_method = cipher.RSACipher(sender_private_key, receiver_public_key)
         else: # ecc
             sender_private_key = get_keys(sender, "ecc", "private")
-            sender_public_key = get_keys(sender, "ecc", "public")
             receiver_public_key = get_keys(receiver, "ecc", "public")
-            chosen_cipher_method = cipher.ECCCipher(sender_private_key, sender_public_key, receiver_public_key)
+            chosen_cipher_method = cipher.ECCCipher(sender_private_key, receiver_public_key)
+            
+        if action == "encrypt":
+            filewalker.walk_files_and_apply_asym_encryption_func(directory, chosen_cipher_method.encrypt)
+        elif action == "decrypt":
+            filewalker.walk_files_and_apply_asym_decryption_func(directory, chosen_cipher_method.decrypt)
     
-    if action == "encrypt":
-        filewalker.walk_files_and_apply_func(directory, chosen_cipher_method.encrypt)
-    elif action == "decrypt":
-        filewalker.walk_files_and_apply_func(directory, chosen_cipher_method.decrypt)
+
     
 
 if __name__ == "__main__":
